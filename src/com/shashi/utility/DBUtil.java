@@ -4,39 +4,30 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
-
 import com.shashi.beans.TrainException;
 import com.shashi.constant.ResponseCode;
 
 public class DBUtil {
-	private static Connection con;
 
-	static {
+    private static final ResourceBundle rb = ResourceBundle.getBundle("application");
+    private static final String DRIVER_NAME = rb.getString("driverName");
+    private static final String CONNECTION_STRING = rb.getString("connectionString");
+    private static final String USERNAME = rb.getString("username");
+    private static final String PASSWORD = rb.getString("password");
 
-		ResourceBundle rb = ResourceBundle.getBundle("application");
+    static {
+        try {
+            Class.forName(DRIVER_NAME);
+        } catch (ClassNotFoundException e) {
+            throw new ExceptionInInitializerError("Failed to load database driver: " + DRIVER_NAME);
+        }
+    }
 
-		try {
-			Class.forName(rb.getString("driverName"));
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-
-		try {
-			System.out.println(rb.getString("connectionString"));
-			System.out.println(rb.getString("username"));
-			System.out.println(rb.getString("password"));
-			con = DriverManager.getConnection(rb.getString("connectionString"), rb.getString("username"),
-					rb.getString("password"));
-			System.out.println("Connection Success!!");
-		} catch (SQLException e) {
-
-			e.printStackTrace();
-		}
-	}
-
-	public static Connection getConnection() throws TrainException {
-		if (con == null)
-			throw new TrainException(ResponseCode.DATABASE_CONNECTION_FAILURE);
-		return con;
-	}
+    public static Connection getConnection() throws TrainException {
+        try {
+            return DriverManager.getConnection(CONNECTION_STRING, USERNAME, PASSWORD);
+        } catch (SQLException e) {
+            throw new TrainException(ResponseCode.DATABASE_CONNECTION_FAILURE);
+        }
+    }
 }
